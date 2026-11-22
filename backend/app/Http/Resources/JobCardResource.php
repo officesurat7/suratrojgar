@@ -79,7 +79,7 @@ class JobCardResource extends JsonResource
                 'questions' => $j->questions->map(fn ($q) => ['id' => $q->id, 'question' => $q->question, 'is_required' => $q->is_required])->values(),
                 'status' => $j->status,
                 'is_active' => $j->isPubliclyVisible(),
-                'company_about' => $j->employerProfile?->about ? Str::limit($j->employerProfile->about, 600) : null,
+                'company_about' => $j->relationLoaded('employerProfile') && $j->employerProfile?->about ? Str::limit($j->employerProfile->about, 600) : null,
             ];
         }
 

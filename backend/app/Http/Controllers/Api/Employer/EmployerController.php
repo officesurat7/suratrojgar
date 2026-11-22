@@ -48,10 +48,9 @@ class EmployerController extends Controller
                 'today' => (clone $apps)->where('created_at', '>=', now()->startOfDay())->count(),
             ],
             'views_total' => (int) Job::where('employer_id', $user->id)->sum('views_count'),
-            'recent_applications' => ApplicationResource::collection(
-                Application::with(['job.locality', 'user.seekerProfile.locality', 'user.seekerProfile.educationLevel'])
-                    ->whereIn('job_id', Job::where('employer_id', $user->id)->select('id'))->latest()->limit(6)->get()
-            )->map(fn ($r) => $r->as('employer'))->resolve(),
+            'recent_applications' => Application::with(['job.locality', 'user.seekerProfile.locality', 'user.seekerProfile.educationLevel'])
+                ->whereIn('job_id', Job::where('employer_id', $user->id)->select('id'))->latest()->limit(6)->get()
+                ->map(fn ($a) => (new ApplicationResource($a))->as('employer')->resolve())->values(),
             'unread_notifications' => $user->unreadNotifications()->count(),
         ]);
     }
@@ -109,7 +108,7 @@ class EmployerController extends Controller
     public function jobs(Request $request): JsonResponse
     {
         $request->validate(['status' => ['nullable', Rule::in(Options::JOB_STATUSES)], 'q' => ['nullable', 'string', 'max:100']]);
-        $page = Job::with(['category', 'role', 'locality', 'educationLevel', 'skills', 'questions', 'featured'])
+        $page = Job::with(['category', 'role', 'locality', 'educationLevel', 'skills', 'questions', 'featured', 'employerProfile'])
             ->where('employer_id', $request->user()->id)
             ->when($request->status, fn ($q, $s) => $q->where('status', $s))
             ->when($request->q, fn ($q, $s) => $q->where('title', 'like', '%'.addcslashes($s, '%_\\').'%'))
