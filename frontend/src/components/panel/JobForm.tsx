@@ -21,12 +21,12 @@ function fromJob(j: JobFormData | null): Record<string, string> {
 }
 
 /** Create/edit job form shared by employers and admins. Private contact fields are clearly marked. */
-export function JobForm({ initial, endpoint, method, onSaved, defaults }: {
-  initial: JobFormData | null; endpoint: string; method: "post" | "put"; onSaved: (job: JobFormData, message: string) => void; defaults?: Record<string, string>;
+export function JobForm({ initial, endpoint, method, onSaved, defaults, extraBody }: {
+  initial: JobFormData | null; endpoint: string; method: "post" | "put"; onSaved: (job: JobFormData, message: string) => void; defaults?: Record<string, string>; extraBody?: Record<string, unknown>;
 }) {
   const meta = useMeta();
   const { toast } = useToast();
-  const [f, setF] = useState<Record<string, string>>(() => ({ ...fromJob(initial), ...(initial ? {} : defaults ?? {}) }));
+  const [f, setF] = useState<Record<string, string>>(() => ({ ...fromJob(initial), ...(initial?.id ? {} : defaults ?? {}) }));
   const [negotiable, setNegotiable] = useState<boolean>(!!initial?.salary_negotiable);
   const [allowReapply, setAllowReapply] = useState<boolean>(!!initial?.allow_reapply);
   const [req, setReq] = useState<string[]>((initial?.skills_required as string[]) ?? []);
@@ -45,7 +45,7 @@ export function JobForm({ initial, endpoint, method, onSaved, defaults }: {
 
   const save = async (submit: boolean, confirmDuplicate = dupConfirm) => {
     setBusy(submit ? "submit" : "draft"); setErr(null);
-    const body: Record<string, unknown> = { submit, salary_negotiable: negotiable, allow_reapply: allowReapply, skills_required: req, skills_preferred: pref, questions: questions.filter((q) => q.question.trim()), confirm_duplicate: confirmDuplicate };
+    const body: Record<string, unknown> = { ...extraBody, submit, salary_negotiable: negotiable, allow_reapply: allowReapply, skills_required: req, skills_preferred: pref, questions: questions.filter((q) => q.question.trim()), confirm_duplicate: confirmDuplicate };
     for (const k of STR) body[k] = f[k] === "" || f[k] === undefined ? null : f[k];
     try {
       const r = method === "post" ? await api.post<{ message: string; data: JobFormData }>(endpoint, body) : await api.put<{ message: string; data: JobFormData }>(endpoint, body);

@@ -17,7 +17,7 @@ export interface ReviewApp {
 }
 
 /** Candidate review panel used by employers and admins. `base` is the API prefix ("employer/applications" or "admin/applications"). */
-export function ApplicationReview({ app, base, onChanged, resumePath, notesPath }: { app: ReviewApp; base: string; onChanged: () => void; resumePath?: string; notesPath?: string }) {
+export function ApplicationReview({ app, base, onChanged, resumePath, notesPath, notesMode = "edit", canChange = true }: { app: ReviewApp; base: string; onChanged: () => void; resumePath?: string; notesPath?: string; notesMode?: "edit" | "read"; canChange?: boolean }) {
   const meta = useMeta();
   const { toast } = useToast();
   const [status, setStatus] = useState("");
@@ -87,7 +87,7 @@ export function ApplicationReview({ app, base, onChanged, resumePath, notesPath 
         <Card title="Status">
           <div className="mb-3 flex items-center gap-2"><StatusBadge status={app.status} label={app.status_label} /><span className="text-xs text-slate-500">Applied {dateIST(app.applied_at)}</span></div>
           {app.interview_at && <p className="mb-3 rounded-lg bg-indigo-50 p-2.5 text-sm text-indigo-800">Interview: {dateTimeIST(app.interview_at)}{app.interview_details ? ` · ${app.interview_details}` : ""}</p>}
-          {locked ? <Alert tone="amber">The candidate withdrew this application.</Alert> : (
+          {locked ? <Alert tone="amber">The candidate withdrew this application.</Alert> : !canChange ? <p className="text-sm text-slate-500">You can view this application but not change its status.</p> : (
             <div className="space-y-3">
               {err && !Object.keys(err.errors).length && <Alert tone="red">{err.message}</Alert>}
               <Select label="Change to" options={toOptions(statuses)} value={status} onChange={(e) => setStatus(e.target.value)} error={err?.field("status")} />
@@ -102,10 +102,16 @@ export function ApplicationReview({ app, base, onChanged, resumePath, notesPath 
             </div>
           )}
         </Card>
-        <Card title="Private notes">
-          <Textarea rows={4} maxLength={3000} value={notes} onChange={(e) => setNotes(e.target.value)} hint="Only you and SuratRojgar admins can see these." />
-          <Button className="mt-3" size="sm" variant="secondary" loading={busy === "notes"} onClick={saveNotes}>Save notes</Button>
-        </Card>
+        {notesMode === "edit" ? (
+          <Card title="Private notes">
+            <Textarea rows={4} maxLength={3000} value={notes} onChange={(e) => setNotes(e.target.value)} hint="Only you and SuratRojgar admins can see these." />
+            <Button className="mt-3" size="sm" variant="secondary" loading={busy === "notes"} onClick={saveNotes}>Save notes</Button>
+          </Card>
+        ) : (
+          <Card title="Employer's private notes">
+            <p className="whitespace-pre-line text-sm text-slate-700">{app.employer_notes || "No notes."}</p>
+          </Card>
+        )}
       </div>
     </div>
   );

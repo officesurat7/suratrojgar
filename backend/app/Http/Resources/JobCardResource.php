@@ -25,6 +25,8 @@ class JobCardResource extends JsonResource
     public function toArray(Request $request): array
     {
         $j = $this->resource;
+        // Safety net: hot paths eager-load these; anything else loads them here instead of failing.
+        $j->loadMissing($this->detail ? ['category', 'role', 'locality', 'educationLevel', 'skills', 'questions', 'employerProfile'] : ['category', 'role', 'locality', 'educationLevel']);
         $data = [
             'id' => $j->id,
             'slug' => $j->slug,

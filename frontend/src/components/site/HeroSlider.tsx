@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { Slider } from "@/lib/api-server";
 import { cx } from "@/lib/format";
 
-const THEMES: Record<string, string> = {
+export const THEMES: Record<string, string> = {
   blue: "from-brand-600 via-brand-700 to-brand-900",
   navy: "from-ink via-brand-900 to-brand-700",
   emerald: "from-accent-600 via-brand-700 to-brand-900",

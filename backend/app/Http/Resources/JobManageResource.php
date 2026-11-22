@@ -28,6 +28,7 @@ class JobManageResource extends JobCardResource
             'contact_email' => $j->contact_email,
             'gender_justification' => $j->gender_justification,
             'allow_reapply' => $j->allow_reapply,
+            'deleted_at' => $j->deleted_at?->toIso8601String(),
             'rejection_reason' => $j->rejection_reason,
             'submitted_at' => $j->submitted_at?->toIso8601String(),
             'approved_at' => $j->approved_at?->toIso8601String(),

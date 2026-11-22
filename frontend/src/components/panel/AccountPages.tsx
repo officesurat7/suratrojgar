@@ -178,7 +178,7 @@ function PrivacyCard() {
   };
   return (
     <Card title="Your data and privacy" className="lg:col-span-2">
-      <p className="text-sm text-slate-600">Under India's Digital Personal Data Protection Act you can ask us to correct or erase your personal data. See our <Link href="/privacy-policy" className="font-semibold text-brand-700 underline">Privacy Policy</Link>.</p>
+      <p className="text-sm text-slate-600">Under India&apos;s Digital Personal Data Protection Act you can ask us to correct or erase your personal data. See our <Link href="/privacy-policy" className="font-semibold text-brand-700 underline">Privacy Policy</Link>.</p>
       <div className="mt-4 flex flex-wrap gap-2">
         <Button variant="outline" size="sm" onClick={() => setModal("correction")}>Request a correction</Button>
         <Button variant="outline" size="sm" onClick={() => setModal("deactivate")}>Deactivate account</Button>

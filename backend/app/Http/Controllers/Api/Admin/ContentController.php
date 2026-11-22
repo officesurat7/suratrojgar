@@ -71,6 +71,9 @@ class ContentController extends Controller
             unset($rules['is_active']);
         }
         $data = $request->validate($rules);
+        if (array_key_exists('sort_order', $data) && $data['sort_order'] === null) {
+            unset($data['sort_order']);   // NOT NULL column with a default
+        }
         $item = $id ? $class::findOrFail($id) : new $class;
         $old = $item->toArray();
         $item->fill($data);

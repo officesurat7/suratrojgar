@@ -30,7 +30,7 @@ class JobAdminController extends Controller
     {
         $request->validate(['status' => ['nullable', Rule::in(array_merge(Options::JOB_STATUSES, ['deleted']))], 'q' => ['nullable', 'string', 'max:100'],
             'sort' => ['nullable', Rule::in(['latest', 'oldest', 'applications', 'views', 'expiry'])]]);
-        $q = Job::with(['category', 'locality', 'featured', 'employer:id,name,email,status']);
+        $q = Job::with(self::WITH);
         if ($request->status === 'deleted') {
             $q->onlyTrashed();
         } elseif ($request->status) {

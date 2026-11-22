@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { homeFor, useAuth } from "@/components/providers";
 import { Logo } from "@/components/site/Logo";
-import { PageLoader } from "@/components/ui";
+import { EmptyState, PageLoader } from "@/components/ui";
 import { api } from "@/lib/api";
 import { cx } from "@/lib/format";
 import type { SessionUser } from "@/lib/types";
@@ -47,7 +47,8 @@ export function Shell({ allow, nav, title, children }: { allow: SessionUser["use
   const [open, setOpen] = useState(false);
   const [unread, setUnread] = useState(0);
 
-  useEffect(() => { setOpen(false); }, [pathname]);
+  const [lastPath, setLastPath] = useState(pathname);
+  if (pathname !== lastPath) { setLastPath(pathname); setOpen(false); }
   useEffect(() => {
     if (loading) return;
     if (!user) router.replace(`/login?next=${encodeURIComponent(pathname)}`);
@@ -63,8 +64,11 @@ export function Shell({ allow, nav, title, children }: { allow: SessionUser["use
   const items = nav.filter((n) => !n.perm || can(n.perm));
   const isActive = (n: NavItem) => (n.exact ? pathname === n.href : pathname === n.href || pathname.startsWith(n.href + "/"));
   const base = homeFor(user);
+  // The section this page belongs to (longest matching nav link). Its permission decides whether to show the page.
+  const section = nav.filter((n) => pathname === n.href || pathname.startsWith(n.href + "/")).sort((a, b) => b.href.length - a.href.length)[0];
+  const denied = !!section?.perm && !can(section.perm);
 
-  const NavList = () => (
+  const navList = (
     <nav className="space-y-0.5" aria-label={`${title} navigation`}>
       {items.map((n) => (
         <Link key={n.href} href={n.href} aria-current={isActive(n) ? "page" : undefined}
@@ -82,7 +86,7 @@ export function Shell({ allow, nav, title, children }: { allow: SessionUser["use
       <aside className="sticky top-0 hidden h-screen flex-col border-r border-slate-200 bg-white px-3 py-4 lg:flex">
         <div className="px-2"><Logo className="h-10 w-auto" /></div>
         <p className="mt-4 px-3 text-[11px] font-bold uppercase tracking-wider text-slate-400">{title}</p>
-        <div className="mt-2 flex-1 overflow-y-auto"><NavList /></div>
+        <div className="mt-2 flex-1 overflow-y-auto">{navList}</div>
         <div className="mt-3 border-t border-slate-100 pt-3">
           <div className="flex items-center gap-3 px-2">
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-100 text-sm font-bold text-brand-800">{user.name.charAt(0).toUpperCase()}</span>
@@ -112,7 +116,7 @@ export function Shell({ allow, nav, title, children }: { allow: SessionUser["use
             <aside className="absolute inset-y-0 left-0 flex w-[84%] max-w-xs flex-col bg-white px-3 py-4 shadow-2xl">
               <div className="flex items-center justify-between px-2"><Logo className="h-9 w-auto" /><button onClick={() => setOpen(false)} className="rounded-lg p-2 text-slate-500" aria-label="Close menu">✕</button></div>
               <p className="mt-4 px-3 text-[11px] font-bold uppercase tracking-wider text-slate-400">{title}</p>
-              <div className="mt-2 flex-1 overflow-y-auto"><NavList /></div>
+              <div className="mt-2 flex-1 overflow-y-auto">{navList}</div>
               <div className="mt-3 grid grid-cols-2 gap-2 border-t border-slate-100 pt-3">
                 <Link href="/" className="rounded-lg border border-slate-200 py-2.5 text-center text-sm font-semibold text-slate-700">View site</Link>
                 <button onClick={() => logout()} className="rounded-lg border border-red-200 py-2.5 text-sm font-semibold text-red-600">Logout</button>
@@ -120,7 +124,7 @@ export function Shell({ allow, nav, title, children }: { allow: SessionUser["use
             </aside>
           </div>
         )}
-        <main id="main" className="mx-auto w-full max-w-6xl px-4 py-5 sm:px-6 sm:py-8">{children}</main>
+        <main id="main" className="mx-auto w-full max-w-6xl px-4 py-5 sm:px-6 sm:py-8">{denied ? <EmptyState icon="🔒" title="You don’t have access to this section" text="Ask an Admin to give you this permission." action={<Link href={base} className="inline-flex rounded-xl bg-brand-600 px-4 py-2.5 text-[15px] font-semibold text-white hover:bg-brand-700">Go to dashboard</Link>} /> : children}</main>
       </div>
     </div>
   );
