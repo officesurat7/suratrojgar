@@ -388,7 +388,7 @@ class AuthController extends Controller
 
     private function issueToken(User $user, Request $request): JsonResponse
     {
-        $ttl = $user->isAdminType() ? (int) env('TOKEN_TTL_ADMIN', 720) : (int) env('TOKEN_TTL_USER', 10080);
+        $ttl = (int) config($user->isAdminType() ? 'sanctum.ttl_admin' : 'sanctum.ttl_user');
         $device = Str::limit((string) $request->userAgent(), 100, '') ?: 'device';
         $token = $user->createToken($device, ['*'], now()->addMinutes($ttl));
         $user->load(['employerProfile', 'seekerProfile']);

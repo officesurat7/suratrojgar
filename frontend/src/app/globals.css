@@ -60,3 +60,12 @@ body {
   .chip { @apply inline-flex items-center gap-1 rounded-full bg-brand-50 px-2.5 py-1 text-xs font-medium text-brand-800; }
   .h-section { @apply text-xl font-extrabold tracking-tight text-ink sm:text-2xl; }
 }
+
+/* Long-form policy text */
+@layer components {
+  .prose-legal { @apply text-[15px] leading-7 text-slate-700; }
+  .prose-legal p { @apply mt-3; }
+  .prose-legal ul { @apply mt-3 list-disc space-y-1.5 pl-5; }
+  .prose-legal a { @apply font-semibold text-brand-700 underline; }
+  .prose-legal strong { @apply text-ink; }
+}

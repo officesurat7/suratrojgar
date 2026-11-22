@@ -52,6 +52,10 @@ return [
 
     'expiration' => null,
 
+    // Per-login token lifetimes in minutes (set on each token when it is issued)
+    'ttl_user' => (int) env('TOKEN_TTL_USER', 10080),   // 7 days
+    'ttl_admin' => (int) env('TOKEN_TTL_ADMIN', 720),   // 12 hours
+
     /*
     |--------------------------------------------------------------------------
     | Token Prefix
