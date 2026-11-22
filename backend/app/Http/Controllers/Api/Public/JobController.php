@@ -134,6 +134,9 @@ class JobController extends Controller
             if (! $user->isJobSeeker()) {
                 return response()->json(['message' => 'Only registered job seekers can view employer contact details.'], 403);
             }
+            if (! $user->email_verified_at) {
+                return response()->json(['message' => 'Please verify your email to view employer contact details.', 'code' => 'email_unverified'], 403);
+            }
             if ($job->contact_visibility === 'hidden') {
                 return response()->json(['message' => 'This employer accepts applications only through SuratRojgar. Please use "Apply Now".', 'code' => 'contact_hidden'], 403);
             }

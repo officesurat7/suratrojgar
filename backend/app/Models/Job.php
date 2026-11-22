@@ -40,7 +40,10 @@ class Job extends Model
     protected static function booted(): void
     {
         static::saving(function (Job $job) {
-            $job->slug = Str::limit(Str::slug($job->title.' '.($job->locality?->name ?? 'surat')), 170, '');
+            if (! $job->slug || $job->isDirty(['title', 'locality_id'])) {
+                $area = $job->locality_id ? Locality::whereKey($job->locality_id)->value('name') : null;
+                $job->slug = Str::limit(Str::slug($job->title.' '.($area ?? 'surat')), 170, '');
+            }
             $job->salary_monthly_min = \App\Support\Options::toMonthly($job->salary_min !== null ? (float) $job->salary_min : null, $job->salary_period);
             $job->salary_monthly_max = \App\Support\Options::toMonthly($job->salary_max !== null ? (float) ($job->salary_max) : null, $job->salary_period);
             $job->fingerprint = sha1(Str::lower(trim($job->title)).'|'.$job->job_category_id.'|'.$job->locality_id.'|'.$job->employment_type);
