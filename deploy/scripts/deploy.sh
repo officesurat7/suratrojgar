@@ -18,7 +18,10 @@ ln -sfn "$APP/shared/backend.env" .env
 rm -rf storage && ln -sfn "$APP/shared/storage" storage
 composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
 php artisan storage:link --force >/dev/null
-php artisan down --retry=15 --refresh=15 || true     # only if a previous release is running
+# Maintenance mode lives in the shared storage folder, so it applies to the running release.
+# If anything below fails, the trap brings the site back up on the old release.
+trap 'echo "Deploy FAILED: bringing the site back up on the previous release"; (cd "$REL/backend" && php artisan up) || true' ERR
+php artisan down --retry=15 --refresh=15 || true
 php artisan migrate --force
 php artisan config:cache
 php artisan route:cache
@@ -37,12 +40,13 @@ sudo /usr/bin/supervisorctl restart suratrojgar-web
 cd "$APP/current/backend"
 php artisan queue:restart
 php artisan up
+trap - ERR
 
 echo "==> Keeping the last 5 releases"
 ls -1dt "$APP"/releases/* | tail -n +6 | xargs -r rm -rf
 
 echo "==> Health check"
 sleep 3
-curl -fsS -o /dev/null -w "API %{http_code}\n" http://127.0.0.1/api/v1/meta -H "Host: api.${DOMAIN:-suratrojgar.in}" || echo "WARNING: API health check failed"
+curl -fsS -o /dev/null -w "API %{http_code}\n" "https://api.${DOMAIN:-suratrojgar.in}/api/v1/meta" || echo "WARNING: API health check failed"
 curl -fsS -o /dev/null -w "Web %{http_code}\n" http://127.0.0.1:3000/ || echo "WARNING: website health check failed"
 echo "Deployed $REF ($STAMP)"

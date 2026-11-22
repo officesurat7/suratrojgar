@@ -86,4 +86,12 @@ class AdminPermissionTest extends TestCase
         }
         $this->assertSame('Rahul', EmployerController::csvSafe('Rahul'));
     }
+
+    public function test_resume_views_by_others_are_audited(): void
+    {
+        $seeker = $this->seeker();
+        $resume = \App\Models\Resume::create(['user_id' => $seeker->id, 'original_name' => 'cv.pdf', 'path' => 'resumes/x.pdf', 'mime' => 'application/pdf', 'size' => 1000, 'sha256' => str_repeat('a', 64), 'is_default' => true, 'scan_status' => 'skipped']);
+        $this->actingAsUser($this->makeAdmin('admin'))->getJson("/api/v1/admin/candidates/{$seeker->id}/resumes/{$resume->id}")->assertOk()->assertJsonStructure(['url']);
+        $this->assertDatabaseHas('audit_logs', ['action' => 'resume.viewed', 'auditable_id' => $resume->id]);
+    }
 }

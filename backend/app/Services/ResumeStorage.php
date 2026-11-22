@@ -73,6 +73,10 @@ class ResumeStorage
     /** 5-minute signed download URL. Caller MUST authorise before calling. */
     public function temporaryUrl(Resume $resume, ?int $viewerId = null): string
     {
+        if ($viewerId !== null && $viewerId !== $resume->user_id) {
+            // Someone other than the owner (employer or admin) opened this resume
+            \App\Services\Audit::log('resume.viewed', $resume, [], ['candidate_id' => $resume->user_id], $viewerId);
+        }
         return URL::temporarySignedRoute('resumes.download', now()->addMinutes(5), ['resume' => $resume->id, 'v' => $viewerId]);
     }
 
