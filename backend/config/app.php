@@ -15,6 +15,9 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
+    // Shared secret the Next.js server sends on server-side API reads (see RateLimiter 'public'). Never exposed to browsers.
+    'internal_key' => env('INTERNAL_API_KEY', ''),
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment

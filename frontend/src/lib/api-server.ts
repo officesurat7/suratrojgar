@@ -6,7 +6,8 @@ import type { JobCard, JobDetail, Meta, Paginated } from "./types";
 export async function apiGet<T>(path: string, revalidate = 60): Promise<T | null> {
   try {
     const res = await fetch(`${API_INTERNAL_URL}${path}`, {
-      headers: { Accept: "application/json" },
+      // INTERNAL_API_KEY lets server renders skip the per-IP public rate limit (all renders share the server's IP)
+      headers: { Accept: "application/json", ...(process.env.INTERNAL_API_KEY ? { "X-Internal-Key": process.env.INTERNAL_API_KEY } : {}) },
       next: { revalidate },
     });
     if (!res.ok) return null;

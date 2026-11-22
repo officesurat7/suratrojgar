@@ -30,7 +30,16 @@ class AppServiceProvider extends ServiceProvider
         $by = fn (Request $r) => $r->user()?->id ? 'u'.$r->user()->id : 'ip'.$r->ip();
 
         // Anti-scraping: public listing/detail endpoints per IP
-        RateLimiter::for('public', fn (Request $r) => [Limit::perMinute(120)->by('ip'.$r->ip()), Limit::perDay(10000)->by('ipd'.$r->ip())]);
+        // Server-side page renders from the Next.js server all come from one IP. They prove themselves with a shared
+        // secret (INTERNAL_API_KEY) and are not throttled per IP; browser calls still are (real IP via X-Forwarded-For).
+        $internal = function (Request $r): bool {
+            $key = (string) config('app.internal_key');
+
+            return $key !== '' && in_array($r->server('REMOTE_ADDR'), ['127.0.0.1', '::1'], true)
+                && hash_equals($key, (string) $r->header('X-Internal-Key'));
+        };
+        RateLimiter::for('public', fn (Request $r) => $internal($r) ? Limit::none()
+            : [Limit::perMinute(120)->by('ip'.$r->ip()), Limit::perDay(10000)->by('ipd'.$r->ip())]);
         RateLimiter::for('beacon', fn (Request $r) => Limit::perMinute(60)->by('ip'.$r->ip()));
         RateLimiter::for('forms', fn (Request $r) => [Limit::perMinute(3)->by($by($r)), Limit::perDay(20)->by('d'.$by($r))]);
         RateLimiter::for('register', fn (Request $r) => [Limit::perMinute(5)->by('ip'.$r->ip()), Limit::perDay(30)->by('ipd'.$r->ip())]);
