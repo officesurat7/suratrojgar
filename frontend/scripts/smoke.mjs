@@ -12,6 +12,7 @@ let failed = 0;
 const browser = await chromium.launch();
 for (const viewport of SIZES) {
   const page = await (await browser.newContext({ viewport })).newPage();
+  page.setDefaultNavigationTimeout(90000);  // first hit on a dev server compiles the page
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   for (const path of PAGES) {

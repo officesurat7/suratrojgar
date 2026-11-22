@@ -1,0 +1,5 @@
+# /etc/cron.d/suratrojgar
+# Laravel scheduler: job expiry, alerts, analytics roll-ups, retention clean-up and the daily backup.
+* * * * * suratrojgar cd /var/www/suratrojgar/current/backend && /usr/bin/php artisan schedule:run >> /dev/null 2>&1
+# Copy backups off the server every night (see scripts/backup-offsite.sh). Uncomment after configuring rclone.
+# 45 3 * * * suratrojgar /var/www/suratrojgar/current/deploy/scripts/backup-offsite.sh >> /var/log/suratrojgar/backup-offsite.log 2>&1
