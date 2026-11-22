@@ -21,7 +21,7 @@ const csp = [
   "base-uri 'self'",
   "form-action 'self'",
   "object-src 'none'",
-  "upgrade-insecure-requests",
+  ...(process.env.NODE_ENV === "production" ? ["upgrade-insecure-requests"] : []),
 ].join("; ");
 
 const securityHeaders = [
@@ -37,6 +37,8 @@ const nextConfig: NextConfig = {
   // Self-contained server bundle for the Hostinger VPS (run with: node .next/standalone/server.js)
   output: "standalone",
   poweredByHeader: false,
+  devIndicators: false,
+  allowedDevOrigins: ["127.0.0.1", "localhost"],
   reactStrictMode: true,
   images: {
     formats: ["image/avif", "image/webp"],

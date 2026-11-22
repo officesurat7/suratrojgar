@@ -32,7 +32,7 @@ class JobController extends Controller
         $request->validate([
             'q' => ['nullable', 'string', 'max:100'], 'page' => ['nullable', 'integer', 'min:1', 'max:500'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:50'],
-            'sort' => ['nullable', 'in:latest,salary,relevance,location'],
+            'sort' => ['nullable', 'in:latest,salary,relevance,location,date'],
             'posted' => ['nullable', 'in:24h,7d,30d'],
             'salary_min' => ['nullable', 'numeric', 'min:0'], 'salary_max' => ['nullable', 'numeric', 'min:0'],
         ]);

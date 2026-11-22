@@ -79,10 +79,10 @@ export function LoadMoreJobs({ initial, query = "" }: { initial: Paginated<Job>;
   );
 }
 
-export function StaticJobGrid({ jobs }: { jobs: Job[] }) {
+export function StaticJobGrid({ jobs, cols = "sm:grid-cols-2 lg:grid-cols-3" }: { jobs: Job[]; cols?: string }) {
   const { saved, applied, toggle } = useJobStates(jobs);
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className={`grid gap-4 ${cols}`}>
       {jobs.map((j) => <JobCard key={j.id} job={j} saved={saved.has(j.id)} applied={applied.has(j.id)} onToggleSave={toggle} />)}
     </div>
   );
