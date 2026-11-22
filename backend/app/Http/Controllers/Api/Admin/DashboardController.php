@@ -91,7 +91,7 @@ class DashboardController extends Controller
             $statusBreakdown = DB::table('applications')->whereBetween('created_at', [$range->start, $range->end])
                 ->selectRaw('status, COUNT(*) c')->groupBy('status')->pluck('c', 'status');
 
-            return ['range' => $range->toArray(), 'series' => $series, 'application_status' => $statusBreakdown];
+            return ['range' => $range->toArray(), 'series' => $series, 'application_status' => $statusBreakdown->all()];
         });
 
         return response()->json($data);

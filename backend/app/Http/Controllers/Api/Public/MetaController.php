@@ -31,12 +31,12 @@ class MetaController extends Controller
                 'categories' => JobCategory::where('is_active', true)->orderBy('sort_order')->orderBy('name')
                     ->with(['roles' => fn ($q) => $q->where('is_active', true)->orderBy('name')->select('id', 'job_category_id', 'name', 'slug')])
                     ->get(['id', 'name', 'slug', 'icon', 'description'])
-                    ->map(fn ($c) => $c->toArray() + ['job_count' => (int) ($catCounts[$c->id] ?? 0)]),
+                    ->map(fn ($c) => $c->toArray() + ['job_count' => (int) ($catCounts[$c->id] ?? 0)])->values()->all(),
                 'localities' => Locality::where('is_active', true)->orderBy('sort_order')->orderBy('name')
                     ->get(['id', 'name', 'slug', 'zone', 'pincode'])
-                    ->map(fn ($l) => $l->toArray() + ['job_count' => (int) ($locCounts[$l->id] ?? 0)]),
-                'education_levels' => EducationLevel::where('is_active', true)->orderBy('rank')->get(['id', 'name', 'slug', 'rank']),
-                'business_categories' => BusinessCategory::where('is_active', true)->orderBy('name')->get(['id', 'name', 'slug']),
+                    ->map(fn ($l) => $l->toArray() + ['job_count' => (int) ($locCounts[$l->id] ?? 0)])->values()->all(),
+                'education_levels' => EducationLevel::where('is_active', true)->orderBy('rank')->get(['id', 'name', 'slug', 'rank'])->toArray(),
+                'business_categories' => BusinessCategory::where('is_active', true)->orderBy('name')->get(['id', 'name', 'slug'])->toArray(),
                 'options' => [
                     'employment_types' => Options::EMPLOYMENT_TYPES,
                     'work_modes' => Options::WORK_MODES,

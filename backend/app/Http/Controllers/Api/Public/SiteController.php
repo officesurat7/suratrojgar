@@ -112,12 +112,12 @@ class SiteController extends Controller
     {
         $data = Cache::remember('sitemap:data:v'.cache('jobs:version', 1), 900, fn () => [
             'jobs' => Job::publiclyVisible()->orderByDesc('published_at')->limit(45000)->get(['id', 'slug', 'updated_at'])
-                ->map(fn ($j) => ['path' => $j->publicUrlPath(), 'updated_at' => $j->updated_at?->toIso8601String()]),
+                ->map(fn ($j) => ['path' => $j->publicUrlPath(), 'updated_at' => $j->updated_at?->toIso8601String()])->all(),
             // Only list landing pages that actually have jobs (avoid thin/duplicate pages)
-            'localities' => Locality::where('is_active', true)->whereHas('jobs', fn ($q) => $q->publiclyVisible())->pluck('slug'),
-            'categories' => JobCategory::where('is_active', true)->whereHas('jobs', fn ($q) => $q->publiclyVisible())->pluck('slug'),
-            'roles' => JobRole::where('is_active', true)->whereIn('id', Job::publiclyVisible()->select('job_role_id'))->pluck('slug'),
-            'companies' => EmployerProfile::whereNotNull('verified_at')->whereIn('user_id', Job::publiclyVisible()->select('employer_id'))->pluck('slug'),
+            'localities' => Locality::where('is_active', true)->whereHas('jobs', fn ($q) => $q->publiclyVisible())->pluck('slug')->all(),
+            'categories' => JobCategory::where('is_active', true)->whereHas('jobs', fn ($q) => $q->publiclyVisible())->pluck('slug')->all(),
+            'roles' => JobRole::where('is_active', true)->whereIn('id', Job::publiclyVisible()->select('job_role_id'))->pluck('slug')->all(),
+            'companies' => EmployerProfile::whereNotNull('verified_at')->whereIn('user_id', Job::publiclyVisible()->select('employer_id'))->pluck('slug')->all(),
         ]);
 
         return response()->json($data);
