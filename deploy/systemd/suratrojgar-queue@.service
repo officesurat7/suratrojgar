@@ -1,0 +1,22 @@
+# /etc/systemd/system/suratrojgar-queue@.service : queue workers for emails, OTPs and notifications.
+# Start two: systemctl enable --now suratrojgar-queue@1 suratrojgar-queue@2
+# "high" holds OTP emails so they are never stuck behind bulk mail. deploy.sh runs `artisan queue:restart`,
+# which makes each worker exit after its current job; systemd then starts it again on the new release.
+[Unit]
+Description=SuratRojgar queue worker %i
+After=network.target redis-server.service mysql.service
+
+[Service]
+User=suratrojgar
+Group=suratrojgar
+WorkingDirectory=/var/www/suratrojgar/current/backend
+ExecStart=/usr/bin/php /var/www/suratrojgar/current/backend/artisan queue:work redis --queue=high,notifications,default --sleep=1 --tries=3 --backoff=30 --max-time=3600 --memory=256
+Restart=always
+RestartSec=3
+TimeoutStopSec=120
+StandardOutput=append:/var/log/suratrojgar/queue.log
+StandardError=append:/var/log/suratrojgar/queue.log
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

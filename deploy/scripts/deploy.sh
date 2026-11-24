@@ -36,7 +36,7 @@ npm run build
 echo "==> Switching release"
 ln -sfn "$REL" "$APP/current.new" && mv -Tf "$APP/current.new" "$APP/current"
 sudo /usr/bin/systemctl reload php8.3-fpm
-sudo /usr/bin/supervisorctl restart suratrojgar-web
+sudo /usr/bin/systemctl restart suratrojgar-web
 cd "$APP/current/backend"
 php artisan queue:restart
 php artisan up
@@ -48,5 +48,5 @@ ls -1dt "$APP"/releases/* | tail -n +6 | xargs -r rm -rf
 echo "==> Health check"
 sleep 3
 curl -fsS -o /dev/null -w "API %{http_code}\n" "https://api.${DOMAIN:-suratrojgar.in}/api/v1/meta" || echo "WARNING: API health check failed"
-curl -fsS -o /dev/null -w "Web %{http_code}\n" http://127.0.0.1:3000/ || echo "WARNING: website health check failed"
+curl -fsS -o /dev/null -w "Web %{http_code}\n" http://127.0.0.1:3200/ || echo "WARNING: website health check failed"
 echo "Deployed $REF ($STAMP)"

@@ -8,6 +8,6 @@ PREV=$(ls -1dt "$APP"/releases/* | grep -v "^$CUR$" | head -1)
 [ -n "$PREV" ] || { echo "No previous release found"; exit 1; }
 ln -sfn "$PREV" "$APP/current.new" && mv -Tf "$APP/current.new" "$APP/current"
 sudo /usr/bin/systemctl reload php8.3-fpm
-sudo /usr/bin/supervisorctl restart suratrojgar-web
+sudo /usr/bin/systemctl restart suratrojgar-web
 cd "$APP/current/backend" && php artisan config:cache && php artisan route:cache && php artisan queue:restart
 echo "Rolled back to $PREV"

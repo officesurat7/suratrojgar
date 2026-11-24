@@ -1,7 +1,7 @@
 # Architecture
 
 ```
-Browser ──HTTPS──> Nginx ──> Next.js server (:3000) ──┐
+Browser ──HTTPS──> Nginx ──> Next.js server (:3200) ──┐
                      │        pages (SSR/ISR)          │ server-side reads: X-Internal-Key
                      │        /api/backend/* proxy ────┤ browser calls: Bearer token from httpOnly cookie
                      │        /api/auth/* login/logout │

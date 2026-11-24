@@ -1,0 +1,20 @@
+# /etc/systemd/system/suratrojgar-web.service : the Next.js website on 127.0.0.1:3200
+[Unit]
+Description=SuratRojgar website (Next.js)
+After=network.target
+
+[Service]
+User=suratrojgar
+Group=suratrojgar
+WorkingDirectory=/var/www/suratrojgar/current/frontend
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/node /var/www/suratrojgar/current/frontend/node_modules/next/dist/bin/next start -H 127.0.0.1 -p 3200
+Restart=always
+RestartSec=3
+MemoryMax=1G
+StandardOutput=append:/var/log/suratrojgar/web.log
+StandardError=append:/var/log/suratrojgar/web.log
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

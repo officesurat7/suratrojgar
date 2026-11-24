@@ -9,7 +9,7 @@ EMAIL="${2:?usage: server-setup.sh <domain> <email-for-ssl>}"
 
 apt-get update
 apt-get -y upgrade
-apt-get install -y software-properties-common curl git unzip ufw fail2ban supervisor nginx certbot python3-certbot-nginx \
+apt-get install -y software-properties-common curl git unzip ufw fail2ban nginx certbot python3-certbot-nginx \
   mysql-server redis-server clamav-daemon
 add-apt-repository -y ppa:ondrej/php
 apt-get update

@@ -58,11 +58,10 @@ systemctl restart redis-server
 cp deploy/nginx/snippets-suratrojgar-ssl.conf   /etc/nginx/snippets/suratrojgar-ssl.conf
 cp deploy/nginx/snippets-suratrojgar-proxy.conf /etc/nginx/snippets/suratrojgar-proxy.conf
 cp deploy/php-fpm/suratrojgar.conf /etc/php/8.3/fpm/pool.d/
-cp deploy/php-fpm/opcache.ini /etc/php/8.3/fpm/conf.d/99-suratrojgar-opcache.ini
-cp deploy/supervisor/suratrojgar.conf /etc/supervisor/conf.d/
+cp deploy/systemd/suratrojgar-web.service deploy/systemd/suratrojgar-queue@.service /etc/systemd/system/ && systemctl daemon-reload
 cp deploy/cron/suratrojgar /etc/cron.d/suratrojgar
 # Let the app user reload services during deploys, and nothing else:
-echo 'suratrojgar ALL=(root) NOPASSWD: /usr/bin/systemctl reload php8.3-fpm, /usr/bin/supervisorctl restart suratrojgar-web' > /etc/sudoers.d/suratrojgar
+echo 'suratrojgar ALL=(root) NOPASSWD: /usr/bin/systemctl reload php8.3-fpm, /usr/bin/systemctl restart suratrojgar-web' > /etc/sudoers.d/suratrojgar
 # HTTPS certificate (temporarily serve only port 80 for the challenge):
 certbot certonly --nginx -d suratrojgar.in -d www.suratrojgar.in -d api.suratrojgar.in
 cp deploy/nginx/suratrojgar.conf /etc/nginx/sites-available/ && ln -s ../sites-available/suratrojgar.conf /etc/nginx/sites-enabled/
@@ -93,7 +92,7 @@ php artisan key:generate --force       # first time only; writes APP_KEY into th
 php artisan db:seed --force            # reference data only (areas, categories, permissions)
 php artisan sr:create-super-admin
 exit
-supervisorctl reread && supervisorctl update
+systemctl enable --now suratrojgar-web suratrojgar-queue@1 suratrojgar-queue@2
 ```
 
 ### 8. After the first deploy
@@ -101,6 +100,14 @@ supervisorctl reread && supervisorctl update
 - Send a test email from Site settings.
 - Run **Back up now** on the Backups page, then set up `deploy/scripts/backup-offsite.sh` (see [BACKUP.md](BACKUP.md)).
 - Set `ALLOW_INDEXING=true` in `frontend.env` and redeploy only when you're ready for Google to index the site, then submit `https://suratrojgar.in/sitemap.xml` in Google Search Console.
+
+### Sharing the VPS with other websites
+`server-setup.sh` is for an empty server: it upgrades every package and resets the firewall. On a server that already hosts other sites, do not run it. Instead:
+- Install only what is missing (for example `redis-server` and the `php8.3-*` extensions listed in the script). Skip `apt-get upgrade` and the `ufw` lines.
+- Create the `suratrojgar` user and folders with the commands from the script.
+- Use a new MySQL database and user; do not copy `deploy/mysql/suratrojgar.cnf`, because it changes MySQL for every site.
+- Check that port 3200 is free (`ss -tlnp`); if not, change it in `deploy/nginx/suratrojgar.conf`, `deploy/systemd/suratrojgar-web.service` and `deploy/scripts/deploy.sh`.
+- Run `nginx -t` before every reload, so a mistake cannot take the other sites down.
 
 ### Later deploys
 `/var/www/suratrojgar/current/deploy/scripts/deploy.sh main`. If something goes wrong, run `rollback.sh`.
