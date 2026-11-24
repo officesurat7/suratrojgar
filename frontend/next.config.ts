@@ -34,8 +34,6 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  // Self-contained server bundle for the Hostinger VPS (run with: node .next/standalone/server.js)
-  output: "standalone",
   poweredByHeader: false,
   devIndicators: false,
   allowedDevOrigins: ["127.0.0.1", "localhost"],
